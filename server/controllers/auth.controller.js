@@ -9,29 +9,31 @@ const { errorHandler } = require("../helpers/dbErrorHandling");
 const nodemailer = require("nodemailer");
 
 
-const sendMail = ({ email, name, html }, res) => {
+const sendMail = ({ email, html }, res) => {
 
     const transporter = nodemailer.createTransport({
-        service: 'protonmail',
-        port: 8080,
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
+        requireTLS: true,
         auth: {
-            user: "priyanshuSharma507@protonmail.com",
+            user: process.env.EMAIL,
             pass: process.env.PASSWORD
         }
     })
-    console.log(email)
+
+
     let mailOptions = {
-        from: "priyanshuSharma507@protonmail.com",
+        from: "priyanshushrama709@gmail.com",
         to: email,
         subject: "Account activation link🔮",
-        text: `Dear ${name}🤗.`,
         html: html
     }
 
     transporter.sendMail(mailOptions, (err, data) => {
         console.log(err)
         if (err) return res.status(400).json({
-            error: err
+            error: errorHandler(err)
         })
         res.json({
             message: `Email has been sent to ${email}`
@@ -50,20 +52,20 @@ module.exports = {
             const firstError = errors.array().map(error => error.msg)[0];
             return res.status(422).json({ error: firstError })
         }
-        else {
-            User.findOne({
-                email
-            }).exec((error, user) => {
-                if (error) return res.status(500).json({
-                    error: "Internal server error!"
-                })
-                if (user) {
-                    return res.status(400).json({
-                        error: "Email is taken"
-                    })
-                }
+
+        User.findOne({
+            email
+        }).exec((error, user) => {
+            if (error) return res.status(500).json({
+                error: "Internal server error!"
             })
-        }
+            if (user) {
+                return res.status(400).json({
+                    error: "Email is taken"
+                })
+            }
+        })
+
         // generate token
         const token = jwt.sign(
             {
@@ -76,18 +78,16 @@ module.exports = {
                 expiresIn: '15m'
             }
         )
-
         const mailCreadentials = {
             email,
-            name,
             html: `
-                <h1 style="font-family: sans-serif;">Please click to link to activate</h1>
-                <p style="font-family: sans-serif;">${process.env.CLIENT_URL}/user/activate/${token}</p>
-                <hr style="border: none; border-top: 1px solid rgba(0,0,0,0.1);"/>
-                <p style="font-family: sans-serif;"><b>This email contain sensetive info</b></p>
-                <p style="font-family: sans-serif; opacity: 0.6;">${process.env.CLIENT_URL}</p>
-            `
+            <h1 style="font-family: sans-serif;">Please click to link to activate</h1>
+            <p><a href="#" style="font-family: sans-serif;">${process.env.CLIENT_URL}/user/activate/${token}</a></p>
+            <hr style="border: none; border-top: 1px solid rgba(0,0,0,0.1);"/>
+            <p style="font-family: sans-serif;"><b>This email contain sensetive info</b></p>
+            <p style="font-family: sans-serif; opacity: 0.6;">${process.env.CLIENT_URL}</p>
+        `
         }
-        sendMail(mailCreadentials, res)
+        sendMail(mailCreadentials, res);
     }
 }
