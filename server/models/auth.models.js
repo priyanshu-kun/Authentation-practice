@@ -31,10 +31,12 @@ const userSchema = new mongoose.Schema({
 
 // Virtual Password
 userSchema.virtual('password').set(function (password) {
+    console.log("This in set function: ", this);
     this.password = password
     this.salt = this.makeSalt()
     this.hashed_password = this.encryptPassword(password)
 }).get(function () {
+    console.log("This in get function: ", this)
     return this._password
 })
 
