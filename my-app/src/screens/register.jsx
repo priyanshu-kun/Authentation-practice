@@ -14,6 +14,7 @@ const Register = () => {
     });
     const { name, email, password1, password2 } = formData;
     const handleChange = text => e => {
+        console.log(text)
         setFormData({ ...formData, [text]: e.target.value });
     };
 
@@ -25,7 +26,7 @@ const Register = () => {
             if (password1 === password2) {
                 // setFormData({ ...formData, textChange: 'Submitting' });
                 axios
-                    .post(`http://localhost:8080/register`, {
+                    .post(`http://localhost:8080/api/register`, {
                         name,
                         email,
                         password: password1
@@ -67,6 +68,7 @@ const Register = () => {
     return (
         <div className='min-h-screen bg-grey-100 text-gray-900 flex justify-center'>
             {isAuth() && <Redirect to="/" />}
+            <ToastContainer />
             <div className='max-w-screen-xl m-0 sm:m-20 bg-white shadow sm:rounded-lg flex justify-center flex-1'>
                 <div className='lg:w-1/2 xl:w-5/12 p-6 sm:p-12'>
                     <div className='mt-12 flex flex-col items-center'>
@@ -119,7 +121,7 @@ const Register = () => {
                                     Or sign with email or social login
                                 </div>
                             </div>
-                            {/* <div className='flex flex-col items-center'>
+                            <div className='flex flex-col items-center'>
                                 <a
                                     className='w-full max-w-xs 
                                     font-bold shadow-sm rounded-lg py-3
@@ -129,12 +131,18 @@ const Register = () => {
                                     href='/login'
                                     target='_self'
                                 >
-                                    <i className='fas fa-sign-in-alt fa 1x w-6  -ml-2 text-indigo-500' />
+                                    <i className='fas fa-sign-in-alt fa 1x w-6  -ml-2 text-indigo-500' >🤪</i>
                                     <span className='ml-4'>Sign In</span>
                                 </a>
-                            </div> */}
+                            </div>
                         </form>
                     </div>
+                </div>
+                <div className='flex-1 bg-indigo-100 text-center hidden lg:flex'>
+                    <div
+                        className='m-12 xl:m-16 w-full bg-contain bg-center bg-no-repeat'
+                        style={{ backgroundImage: `url(${authSvg})` }}
+                    ></div>
                 </div>
             </div>
         </div>
