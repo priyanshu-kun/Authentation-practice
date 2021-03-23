@@ -88,6 +88,89 @@ module.exports = {
             <p style="font-family: sans-serif; opacity: 0.6;">${process.env.CLIENT_URL}</p>
         `
         }
-        sendMail(mailCreadentials, res);
+        sendMail(mailCreadentials, res,);
+    },
+
+    // account activation controller and save data in user db
+    activationController: (req, res) => {
+        const { token } = req.body;
+        if (token) {
+            jwt.verify(token, process.env.JWT_ACCOUNT_ACTIVATION, (err, decode) => {
+                if (err) return res.status(401).json({
+                    error: 'Expired Token. Signup again'
+                })
+
+                const { name, email, password } = jwt.decode(token);
+                const user = new User({
+                    name,
+                    email,
+                    password
+                })
+                user.save((err, user) => {
+                    if (err) return res.status(401).json({
+                        error: errorHandler(err)
+                    })
+                    return res.json({
+                        success: true,
+                        message: "Signup success"
+                    })
+                })
+            })
+        }
+        else {
+            return res.status(500).json({
+                message: 'error happening please try again!'
+            })
+        }
+    },
+
+    login: (req, res) => {
+        const { email, password } = req.body;
+        console.log(email, password)
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            const firstError = errors.array().map(error => error.msg)[0];
+            return res.status(422).json({
+                errors: firstError
+            });
+        } else {
+            // check if user exist
+            User.findOne({
+                email
+            }).exec((err, user) => {
+                if (err || !user) {
+                    return res.status(400).json({
+                        errors: 'User with that email does not exist. Please signup'
+                    });
+                }
+                // authenticate
+                if (!user.authenticate(password)) {
+                    return res.status(400).json({
+                        errors: 'Email and password do not match'
+                    });
+                }
+                // generate a token and send to client
+                const token = jwt.sign(
+                    {
+                        _id: user._id
+                    },
+                    process.env.JWT_SECRET,
+                    {
+                        expiresIn: '7d'
+                    }
+                );
+                const { _id, name, email, role } = user;
+
+                return res.json({
+                    token,
+                    user: {
+                        _id,
+                        name,
+                        email,
+                        role
+                    }
+                });
+            });
+        }
     }
 }
