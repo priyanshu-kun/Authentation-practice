@@ -1,0 +1,13 @@
+{
+  "name": "full-node-authentication",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:priyanshuSharma-WebDev/Authentation-practice.git",
+  "author": "priyanshuSharma-WebDev <priyanshushrama709@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.12.2"
+  }
+}
